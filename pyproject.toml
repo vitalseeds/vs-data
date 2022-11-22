@@ -11,6 +11,35 @@ python = "^3.10"
 pypyodbc = "^1.3.6"
 requests = "^2.28.1"
 woocommerce = "^3.0.0"
+click = "^8.1.3"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^5.0.4"
+black = "^22.10.0"
+pytest = "^7.2.0"
+isort = "^5.10.1"
+ipython = "^8.6.0"
+pudb = "^2022.1.3"
+
+[tool.poetry.scripts]
+vs-data = "vs_data.__main__:main"
+
+[tool.coverage.paths]
+source = ["src", "*/site-packages"]
+tests = ["tests", "*/tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["vs_data", "tests"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
+
+[tool.isort]
+profile = "black"
+force_single_line = true
+lines_after_imports = 2
 
 [build-system]
 requires = ["poetry-core"]
