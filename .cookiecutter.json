@@ -1,0 +1,14 @@
+{
+  "_output_dir": "/Users/tom/vital_seeds/fm_database/tmp",
+  "_template": "cookiecutter-hypermodern-python",
+  "author": "Tom Readings",
+  "copyright_year": "2022",
+  "development_status": "Development Status :: 3 - Alpha",
+  "email": "thomas.readings@gmail.com",
+  "friendly_name": "Vs Data",
+  "github_user": "tombola",
+  "license": "MIT",
+  "package_name": "vs_data",
+  "project_name": "vs-data",
+  "version": "0.1.0"
+}
