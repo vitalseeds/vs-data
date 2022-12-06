@@ -24,6 +24,11 @@ pudb = "^2022.1.3"
 [tool.poetry.scripts]
 vsdata = "vs_data.__main__:cli"
 
+[tool.poetry.plugins] # Optional super table
+
+[tool.poetry.plugins."vsdata"]
+"vsdata" = "vs_data.__main__:cli"
+
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
 tests = ["tests", "*/tests"]
