@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vs-data"
-version = "0.1.0"
+version = "0.1.1"
 description = "Vital Seeds database website integration"
 authors = ["tombola <thomas.readings@gmail.com>"]
 readme = "README.md"
