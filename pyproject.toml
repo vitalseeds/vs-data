@@ -49,3 +49,6 @@ lines_after_imports = 2
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+markers = ["fmdb: marks integration_tests for filemaker database"]
