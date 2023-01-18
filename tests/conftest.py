@@ -5,6 +5,11 @@ import pytest
 from vs_data.fm import db
 from vs_data.fm.db import pyodbc
 from vs_data.wc import api
+import responses
+import betamax
+
+with betamax.Betamax.configure() as config:
+    config.cassette_library_dir = "tests/fixtures/cassettes"
 
 
 VSDATA_FM_CONNECTION_STRING = os.environ["VSDATA_TEST_FM_CONNECTION_STRING"]
@@ -30,3 +35,9 @@ def linkdb_connection() -> pyodbc.Connection:
 @pytest.fixture
 def wcapi() -> pyodbc.Connection:
     return api.get_api(VSDATA_WC_URL, VSDATA_WC_KEY, VSDATA_WC_SECRET)
+
+
+@pytest.fixture
+def mocked_responses():
+    with responses.RequestsMock() as rsps:
+        yield rsps

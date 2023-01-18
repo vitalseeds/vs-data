@@ -52,11 +52,16 @@ def unset_awaiting_upload_flag(connection, batch_ids=[]):
 def get_products_by_id(wcapi: object, ids: dict):
     ids = [str(id) for id in ids]
     comma_separated_ids = ",".join(ids)
-    products = wcapi.get(
+    response = wcapi.get(
         "products",
         params={"include": comma_separated_ids, "per_page": 100},
     )
-    return products.json() if products else None
+    with open(
+        "tests/fixtures/test_update_batch_stock.json",
+        "w",
+    ) as file:
+        file.write(response.content.decode())
+    return response.json() if response else None
 
 
 def _total_stock_increments(batches):
@@ -81,7 +86,7 @@ def update_wc_stock_for_new_batches(connection, wcapi=None):
     log.debug(batches)
 
     # Get current wc stock quantity
-    batch_product_ids = [b["wc_product_id"] for b in batches]
+    batch_product_ids = [int(b["wc_product_id"]) for b in batches]
     products = get_products_by_id(wcapi, batch_product_ids)
     # log.debug(products)
     if not batches:
@@ -102,7 +107,7 @@ def update_wc_stock_for_new_batches(connection, wcapi=None):
     stock_increments = _total_stock_increments(batches)
     product_updates = []
     for product in products:
-        current_stock_quantity = product["stock_quantity"]
+        current_stock_quantity = product["stock_quantity"] or 0
         new_stock_quantity = current_stock_quantity + stock_increments[product["id"]]
         product_updates.append(
             {
