@@ -83,6 +83,7 @@ def update_wc_stock_for_new_batches(connection, wcapi=None):
     # Get current wc stock quantity
     batch_product_ids = [b["wc_product_id"] for b in batches]
     products = get_products_by_id(wcapi, batch_product_ids)
+    # log.debug(products)
     if not batches:
         return False
 

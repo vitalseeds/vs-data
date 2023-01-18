@@ -1,11 +1,14 @@
 """Test cases for the __main__ module."""
 import pytest
 from vs_data.stock import batch_upload
+from vs_data import log
 
 
 @pytest.mark.fmdb
-def test_get_acquisitions_sku_map_from_vsdb(vsdb_connection):
-    aquisitions = batch_upload.get_acquisitions_sku_map_from_vsdb(vsdb_connection)
-    assert aquisitions
-    # from rich import print
-    # print(aquisitions[:10])
+@pytest.mark.wcapi
+def test_get_batches_awaiting_upload_join_acq(vsdb_connection):
+    batches = batch_upload.get_batches_awaiting_upload_join_acq(vsdb_connection)
+    log.debug(batches)
+    assert batches
+
+def test_get_products_by_id(wcapi):
