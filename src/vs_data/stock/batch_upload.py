@@ -71,9 +71,23 @@ def _total_stock_increments(batches):
     return stock_increments
 
 
+def get_wc_regular_product_updates(products, stock_increments):
+    product_updates = []
+    for product in products:
+        current_stock_quantity = product["stock_quantity"]
+        new_stock_quantity = current_stock_quantity + stock_increments[product["id"]]
+        product_updates.append(
+            {
+                "id": product["id"],
+                "stock_quantity": new_stock_quantity,
+            }
+        )
+    return {"update": product_updates}
+
+
 # TODO: improve performance of lookups from returned data
 # TODO: add tests
-def update_wc_stock_for_new_batches(connection, wcapi=None):
+def update_wc_stock_for_new_batches(connection, wcapi=None, product_variation=False):
     batches = get_batches_awaiting_upload_join_acq(connection)
     if not batches:
         log.debug("No batches awaiting upload")
@@ -103,17 +117,8 @@ def update_wc_stock_for_new_batches(connection, wcapi=None):
     )
 
     stock_increments = _total_stock_increments(batches)
-    product_updates = []
-    for product in products:
-        current_stock_quantity = product["stock_quantity"]
-        new_stock_quantity = current_stock_quantity + stock_increments[product["id"]]
-        product_updates.append(
-            {
-                "id": product["id"],
-                "stock_quantity": new_stock_quantity,
-            }
-        )
-    data = {"update": product_updates}
+
+    data = get_wc_regular_product_updates(products, stock_increments)
     response = wcapi.post("products/batch", data).json()
 
     # Check response for batches whose products have had stock updated on WC
