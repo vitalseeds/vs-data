@@ -12,7 +12,8 @@ from rich import print
 from vs_data import log
 from vs_data.cli.table import display_table
 from vs_data.fm import constants
-from vs_data.fm import db as fmdb
+from vs_data.fm.constants import fname as _f
+from vs_data.fm.constants import tname as _t
 
 
 WC_MAX_API_RESULT_COUNT = 10
@@ -20,7 +21,7 @@ WC_MAX_API_RESULT_COUNT = 10
 
 def get_batches_awaiting_upload_join_acq(connection):
     columns = ["awaiting_upload", "batch_number", "packets", "sku", "wc_product_id"]
-    awaiting = constants.fname("packeting_batches", "awaiting_upload")
+    awaiting = _f("packeting_batches", "awaiting_upload")
     where = f"lower({awaiting})='yes' AND b.pack_date IS NOT NULL"
 
     sql = (
@@ -33,12 +34,38 @@ def get_batches_awaiting_upload_join_acq(connection):
     return [dict(zip(columns, r)) for r in rows]
 
 
+def get_large_batches_awaiting_upload_join_acq(connection):
+    columns = [
+        "awaiting_upload",
+        "batch_number",
+        "packets",
+        "sku",
+        "wc_product_id",
+        "wc_variation_lg_id",
+    ]
+    awaiting = _f("large_batches", "awaiting_upload")
+    where = f"lower({awaiting})='yes' AND b.pack_date IS NOT NULL"
+
+    sql = (
+        "SELECT B.awaiting_upload, B.batch_number, B.packets, A.sku, A.wc_product_id, A.wc_variation_lg_id "
+        f'FROM "{_t("large_batches")}" B '
+        'LEFT JOIN "acquisitions" A ON B.sku = A.SKU '
+        "WHERE " + where
+    )
+    log.debug(sql)
+    from pudb import set_trace
+
+    set_trace()
+    rows = connection.cursor().execute(sql).fetchall()
+    return [dict(zip(columns, r)) for r in rows]
+
+
 def unset_awaiting_upload_flag(connection, batch_ids=[]):
     assert batch_ids
 
-    fm_table = constants.tname("packeting_batches")
-    awaiting_upload = constants.fname("packeting_batches", "awaiting_upload")
-    batch_number = constants.fname("packeting_batches", "batch_number")
+    fm_table = _t("packeting_batches")
+    awaiting_upload = _f("packeting_batches", "awaiting_upload")
+    batch_number = _f("packeting_batches", "batch_number")
     sql = ""
     for batch in batch_ids:
         sql = f"UPDATE {fm_table} SET {awaiting_upload}='no' WHERE {batch_number} = {batch}"
@@ -71,7 +98,7 @@ def _total_stock_increments(batches):
     return stock_increments
 
 
-def get_wc_regular_product_updates(products, stock_increments):
+def wc_regular_product_update_request(products, stock_increments):
     product_updates = []
     for product in products:
         current_stock_quantity = product["stock_quantity"]
@@ -88,14 +115,19 @@ def get_wc_regular_product_updates(products, stock_increments):
 # TODO: improve performance of lookups from returned data
 # TODO: add tests
 def update_wc_stock_for_new_batches(connection, wcapi=None, product_variation=False):
-    batches = get_batches_awaiting_upload_join_acq(connection)
+
+    if product_variation == "large":
+        batches = get_large_batches_awaiting_upload_join_acq(connection)
+    else:
+        batches = get_batches_awaiting_upload_join_acq(connection)
+
     if not batches:
         log.debug("No batches awaiting upload")
         return False
 
     log.debug("Batches awaiting upload")
     log.debug(batches)
-
+    return
     # Get current wc stock quantity
     batch_product_ids = [b["wc_product_id"] for b in batches]
     products = get_products_by_id(wcapi, batch_product_ids)
@@ -118,7 +150,7 @@ def update_wc_stock_for_new_batches(connection, wcapi=None, product_variation=Fa
 
     stock_increments = _total_stock_increments(batches)
 
-    data = get_wc_regular_product_updates(products, stock_increments)
+    data = wc_regular_product_update_request(products, stock_increments)
     response = wcapi.post("products/batch", data).json()
 
     # Check response for batches whose products have had stock updated on WC
@@ -148,10 +180,10 @@ def get_product_sku_map_from_linkdb(fmlinkdb):
 
 
 def update_acquisitions_wc_id(connection, sku_id_map):
-    fm_table = constants.tname("acquisitions")
+    fm_table = _t("acquisitions")
     link_wc_id = "link_wc_product_id"
     wc_id = "wc_product_id"
-    sku_field = constants.fname("acquisitions", "sku")
+    sku_field = _fn("acquisitions", "sku")
     for row in sku_id_map:
         sql = f"UPDATE {fm_table} SET {wc_id}={row[link_wc_id]} WHERE {sku_field} = '{row['sku']}'"
         print(sql)

@@ -7,6 +7,7 @@ class Acquisitions(FilemakerTable):
     sku = "SKU"
     crop = "crop"
     wc_product_id = "wc_product_id"
+    wc_variation_lg_id = "wc_variation_lg_id"
 
 
 class PacketingBatches(FilemakerTable):
@@ -18,10 +19,11 @@ class PacketingBatches(FilemakerTable):
     batch_number = "batch_number"
     packets = "packets"
     to_pack = "to_pack"
+    pack_date = "pack_date"
 
 
-class PacketingBatchesLarge(FilemakerTable):
-    table_name = "large_batches"
+class LargeBatches(FilemakerTable):
+    table_name = "large_batches"  # rename table occurence 'Growers_batches'
 
     awaiting_upload = "awaiting_upload"
     sku = "sku"
@@ -29,3 +31,4 @@ class PacketingBatchesLarge(FilemakerTable):
     batch_number = "batch_number"
     packets = "packets"  # previously 'packed'
     to_pack = "to_pack"  # previously 'packets'
+    pack_date = "pack_date"
