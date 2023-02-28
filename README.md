@@ -1,5 +1,7 @@
 # VS-data
 
+**This package has been vendored into [vs-data-api](https://github.com/vitalseeds/vs-data-api) for simplicity, and is preserved only for reference.**
+
 This is a python library that serves as a bridge between inventory management in
 FileMaker, and order details on vitalseeds.co.uk.
 
